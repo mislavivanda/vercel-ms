@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { parse } from './index';
+import { format, parse } from './index';
 
 describe('parse(string)', () => {
   it('should not throw an error', () => {
@@ -139,6 +139,32 @@ describe('parse(long string)', () => {
 
   it('should work with negative decimals starting with "."', () => {
     expect(parse('-.5 hr')).toBe(-1800000);
+  });
+});
+
+// scientific notation (roundtrip with large numbers, issue #284)
+
+describe('parse(scientific notation)', () => {
+  it('should parse scientific notation with y unit', () => {
+    expect(Number.isNaN(parse('5.696545792019405e+297y'))).toBe(false);
+  });
+
+  it('should parse scientific notation with ms unit', () => {
+    expect(Number.isNaN(parse('1.5e+10ms'))).toBe(false);
+    expect(parse('1.5e+10ms')).toBe(1.5e10);
+  });
+
+  it('should parse scientific notation with s unit', () => {
+    expect(parse('2e3s')).toBe(2e3 * 1000);
+  });
+
+  it('should parse scientific notation with negative exponent', () => {
+    expect(parse('1.5e-2s')).toBe(1.5e-2 * 1000);
+  });
+
+  it('should support roundtrip for Number.MAX_VALUE', () => {
+    const formatted = format(Number.MAX_VALUE);
+    expect(Number.isNaN(parse(formatted))).toBe(false);
   });
 });
 
