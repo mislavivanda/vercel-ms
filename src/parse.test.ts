@@ -142,6 +142,32 @@ describe('parse(long string)', () => {
   });
 });
 
+// scientific notation (roundtrip with format())
+
+describe('parse(scientific notation)', () => {
+  it('should handle scientific notation produced by format() for very large numbers', () => {
+    // format(Number.MAX_VALUE) produces a string like "5.696545792019405e+297y"
+    // parse() must be able to parse that string back (roundtrip contract)
+    const formatted = `${Math.round(Number.MAX_VALUE / (1000 * 60 * 60 * 24 * 365.25))}y`;
+    expect(Number.isNaN(parse(formatted))).toBe(false);
+  });
+
+  it('should parse positive scientific notation with exponent', () => {
+    expect(Number.isNaN(parse('1e3ms'))).toBe(false);
+    expect(parse('1e3ms')).toBe(1000);
+  });
+
+  it('should parse scientific notation with positive exponent sign', () => {
+    expect(Number.isNaN(parse('1e+3ms'))).toBe(false);
+    expect(parse('1e+3ms')).toBe(1000);
+  });
+
+  it('should parse scientific notation with negative exponent', () => {
+    expect(Number.isNaN(parse('1e-3ms'))).toBe(false);
+    expect(parse('1e-3ms')).toBe(0.001);
+  });
+});
+
 // invalid inputs
 
 describe('parse(invalid inputs)', () => {
